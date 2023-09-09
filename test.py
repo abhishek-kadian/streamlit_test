@@ -1,5 +1,6 @@
 import streamlit as st
 import smtplib
+import os
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
@@ -11,10 +12,21 @@ smtp_server = "smtp.gmail.com"
 smtp_port = 587
 
 def create_pdf_attachment(receiver_name):
-    # Create a PDF attachment with the same text as the email body
+    # Create a PDF file with the same text as the email body
     pdf_content = f"Hi {receiver_name},\n\nThis mail has been sent to you from the web app.\n\nHave a good day!"
-    pdf_attachment = MIMEApplication(pdf_content.encode("utf-8"))
+    
+    # Create a temporary PDF file
+    pdf_filename = "temp_mail_attachment.pdf"
+    with open(pdf_filename, "w") as pdf_file:
+        pdf_file.write(pdf_content)
+    
+    # Create a MIMEApplication for the attachment
+    pdf_attachment = MIMEApplication(open(pdf_filename, "rb").read())
     pdf_attachment.add_header("Content-Disposition", "attachment", filename="mail_attachment.pdf")
+    
+    # Clean up the temporary PDF file
+    os.remove(pdf_filename)
+    
     return pdf_attachment
 
 def send_email(receiver_name, receiver_email):
@@ -45,7 +57,7 @@ def send_email(receiver_name, receiver_email):
         return str(e)
 
 # Streamlit UI
-st.title("Email Sender App v2")
+st.title("Email Sender App")
 receiver_name = st.text_input("Enter the name of the recipient:")
 receiver_email = st.text_input("Enter the recipient's email:")
 
