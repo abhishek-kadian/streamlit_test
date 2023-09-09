@@ -32,7 +32,7 @@ def send_email(receiver_name, receiver_email):
         msg["Subject"] = "Web App Email"
 
         # Create the email body
-        email_body = f"Hi {receiver_name},\n\nThis mail has been sent to you from the web app.\n\nHave a good day!"
+        email_body = f"Hi {receiver_name},\n\nThis mail has been sent to you from the web app. Please check for attachment.\n\nHave a good day!"
         body = MIMEText(email_body, "plain")
         msg.attach(body)
 
