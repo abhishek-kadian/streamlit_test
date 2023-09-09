@@ -4,6 +4,8 @@ import os
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
+from docx2pdf import convert  # Library to convert .docx to .pdf
+from reportlab.pdfgen import canvas  # Library for creating PDFs
 
 # Email configuration (replace with your own credentials)
 sender_email = "cometcreativeconsulting@gmail.com"
@@ -11,23 +13,18 @@ sender_password = "udcoauicgjytqpld"
 smtp_server = "smtp.gmail.com"
 smtp_port = 587
 
-def create_pdf_attachment(receiver_name):
-    # Create a PDF file with the same text as the email body
-    pdf_content = f"Hi {receiver_name},\n\nThis mail has been sent to you from the web app.\n\nHave a good day!"
-    
-    # Create a temporary PDF file
-    pdf_filename = "temp_mail_attachment.pdf"
-    with open(pdf_filename, "w") as pdf_file:
-        pdf_file.write(pdf_content)
-    
-    # Create a MIMEApplication for the attachment
-    pdf_attachment = MIMEApplication(open(pdf_filename, "rb").read())
-    pdf_attachment.add_header("Content-Disposition", "attachment", filename="mail_attachment.pdf")
-    
-    # Clean up the temporary PDF file
-    os.remove(pdf_filename)
-    
-    return pdf_attachment
+# Function to create a PDF with the welcome message
+def create_welcome_pdf(name):
+    pdf_filename = f"Welcome_Letter_{name}.pdf"
+
+    # Create a PDF with the message
+    c = canvas.Canvas(pdf_filename)
+    c.drawString(100, 750, "Hi!")
+    c.drawString(100, 730, "Welcome to the team!")
+    c.drawString(100, 710, "Hope you have a good time!")
+    c.save()
+
+    return pdf_filename
 
 def send_email(receiver_name, receiver_email):
     try:
@@ -35,15 +32,17 @@ def send_email(receiver_name, receiver_email):
         msg = MIMEMultipart()
         msg["From"] = sender_email
         msg["To"] = receiver_email
-        msg["Subject"] = "Web App Email"
+        msg["Subject"] = "Welcome to the Team"
 
-        # Create the email body
-        email_body = f"Hi {receiver_name},\n\nThis mail has been sent to you from the web app.\n\nHave a good day!"
-        body = MIMEText(email_body, "plain")
-        msg.attach(body)
+        # Create the welcome PDF
+        welcome_pdf = create_welcome_pdf(receiver_name)
 
-        # Attach the PDF
-        pdf_attachment = create_pdf_attachment(receiver_name)
+        # Convert the Word document to PDF
+        convert("Letter Template.docx")
+
+        # Attach the welcome PDF
+        pdf_attachment = MIMEApplication(open(welcome_pdf, "rb").read())
+        pdf_attachment.add_header("Content-Disposition", "attachment", filename=welcome_pdf)
         msg.attach(pdf_attachment)
 
         # Connect to the SMTP server and send the email
@@ -52,23 +51,24 @@ def send_email(receiver_name, receiver_email):
         server.login(sender_email, sender_password)
         server.sendmail(sender_email, receiver_email, msg.as_string())
         server.quit()
+
+        # Clean up temporary files
+        os.remove(welcome_pdf)
+        os.remove("Letter Template.pdf")
+
         return True
     except Exception as e:
         return str(e)
 
 # Streamlit UI
-st.title("Email Sender App")
+st.title("Welcome Email Sender App v2")
 receiver_name = st.text_input("Enter the name of the recipient:")
 receiver_email = st.text_input("Enter the recipient's email:")
 
-if st.button("Preview"):
-    if receiver_name and receiver_email:
-        st.write(f"Preview Message:\n\nHi {receiver_name},\n\nThis mail has been sent to you from the web app.\n\nHave a good day!")
-
-if st.button("Send Email"):
+if st.button("Send Welcome Email"):
     if receiver_name and receiver_email:
         result = send_email(receiver_name, receiver_email)
         if result is True:
-            st.success("Email sent successfully!")
+            st.success("Welcome email sent successfully!")
         else:
             st.error(f"Failed to send the email. Error: {result}")
