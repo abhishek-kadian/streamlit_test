@@ -11,34 +11,6 @@ sender_password = "udcoauicgjytqpld"
 smtp_server = "smtp.gmail.com"
 smtp_port = 587
 
-# Function to create a PDF with the welcome message
-def create_welcome_pdf(name):
-    pdf_filename = f"Welcome_Letter_{name}.pdf"
-
-    # Create a PDF with the message
-    from reportlab.lib.pagesizes import letter
-    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
-    from reportlab.lib.styles import getSampleStyleSheet
-    from reportlab.lib import colors
-
-    doc = SimpleDocTemplate(pdf_filename, pagesize=letter)
-    styles = getSampleStyleSheet()
-    Story = []
-
-    # Add the image
-    img = Image("img1.png", width=400, height=400)
-    Story.append(img)
-
-    # Add the text
-    Story.append(Spacer(1, 12))
-    Story.append(Paragraph(f"Hi {name}!", styles["Title"]))
-    Story.append(Paragraph("Welcome to the team!", styles["Normal"]))
-    Story.append(Paragraph("Hope you have a good time!", styles["Normal"]))
-
-    doc.build(Story)
-    
-    return pdf_filename
-
 def send_email(receiver_name, receiver_email):
     try:
         # Create the email content
@@ -47,23 +19,12 @@ def send_email(receiver_name, receiver_email):
         msg["To"] = receiver_email
         msg["Subject"] = "Welcome to the Team"
 
-        # Create the welcome PDF
-        welcome_pdf = create_welcome_pdf(receiver_name)
-
-        # Attach the welcome PDF
-        pdf_attachment = MIMEApplication(open(welcome_pdf, "rb").read())
-        pdf_attachment.add_header("Content-Disposition", "attachment", filename=welcome_pdf)
-        msg.attach(pdf_attachment)
-
         # Connect to the SMTP server and send the email
         server = smtplib.SMTP(smtp_server, smtp_port)
         server.starttls()
         server.login(sender_email, sender_password)
         server.sendmail(sender_email, receiver_email, msg.as_string())
         server.quit()
-
-        # Clean up temporary files
-        os.remove(welcome_pdf)
 
         return True
     except Exception as e:
