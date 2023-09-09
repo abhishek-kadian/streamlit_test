@@ -4,7 +4,7 @@ import os
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
-from docx2pdf import convert  # Library to convert .docx to .pdf
+from docx import Document  # Library to work with .docx files
 from reportlab.pdfgen import canvas  # Library for creating PDFs
 
 # Email configuration (replace with your own credentials)
@@ -37,9 +37,6 @@ def send_email(receiver_name, receiver_email):
         # Create the welcome PDF
         welcome_pdf = create_welcome_pdf(receiver_name)
 
-        # Convert the Word document to PDF
-        convert("Letter Template.docx")
-
         # Attach the welcome PDF
         pdf_attachment = MIMEApplication(open(welcome_pdf, "rb").read())
         pdf_attachment.add_header("Content-Disposition", "attachment", filename=welcome_pdf)
@@ -54,14 +51,13 @@ def send_email(receiver_name, receiver_email):
 
         # Clean up temporary files
         os.remove(welcome_pdf)
-        os.remove("Letter Template.pdf")
 
         return True
     except Exception as e:
         return str(e)
 
 # Streamlit UI
-st.title("Welcome Email Sender App v2")
+st.title("Welcome Email Sender App")
 receiver_name = st.text_input("Enter the name of the recipient:")
 receiver_email = st.text_input("Enter the recipient's email:")
 
