@@ -1,5 +1,7 @@
-streamlit==0.90.0
-smtplib-client==0.4.1
-python-docx==0.8.11
-reportlab==4.0.4
-docx2pdf==0.1.8
+streamlit==1.0.0
+smtplib==3.3
+reportlab==3.5.67
+docx2pdf==0.2.4
+docx2txt==0.9
+Pillow==8.3.1
+github==3.4.0
