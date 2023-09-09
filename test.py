@@ -2,7 +2,8 @@ import streamlit as st
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.mime.application import MIMEApplication
+from email.mime.base import MIMEBase
+from email import encoders
 
 # Email configuration (replace with your own credentials)
 sender_email = "cometcreativeconsulting@gmail.com"
@@ -20,11 +21,13 @@ def send_email(receiver_name, receiver_email):
 
         # Create the email body
         email_body = f"Hi {receiver_name},\n\nThis mail has been sent to you from the web app.\n\nHave a good day!"
-        body = MIMEText(email_body)
+        body = MIMEText(email_body, "plain")
         msg.attach(body)
 
-        # Create the PDF attachment
-        pdf_attachment = MIMEApplication(email_body.encode("utf-8"), _subtype="pdf")
+        # Create and attach the PDF
+        pdf_attachment = MIMEBase("application", "octet-stream")
+        pdf_attachment.set_payload(email_body.encode("utf-8"))
+        encoders.encode_base64(pdf_attachment)
         pdf_attachment.add_header("Content-Disposition", f"attachment; filename=mail_attachment.pdf")
         msg.attach(pdf_attachment)
 
