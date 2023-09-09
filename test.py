@@ -2,14 +2,20 @@ import streamlit as st
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.mime.base import MIMEBase
-from email import encoders
+from email.mime.application import MIMEApplication
 
 # Email configuration (replace with your own credentials)
 sender_email = "cometcreativeconsulting@gmail.com"
 sender_password = "udcoauicgjytqpld"
 smtp_server = "smtp.gmail.com"
 smtp_port = 587
+
+def create_pdf_attachment(receiver_name):
+    # Create a PDF attachment with the same text as the email body
+    pdf_content = f"Hi {receiver_name},\n\nThis mail has been sent to you from the web app.\n\nHave a good day!"
+    pdf_attachment = MIMEApplication(pdf_content.encode("utf-8"))
+    pdf_attachment.add_header("Content-Disposition", "attachment", filename="mail_attachment.pdf")
+    return pdf_attachment
 
 def send_email(receiver_name, receiver_email):
     try:
@@ -24,11 +30,8 @@ def send_email(receiver_name, receiver_email):
         body = MIMEText(email_body, "plain")
         msg.attach(body)
 
-        # Create and attach the PDF
-        pdf_attachment = MIMEBase("application", "octet-stream")
-        pdf_attachment.set_payload(email_body.encode("utf-8"))
-        encoders.encode_base64(pdf_attachment)
-        pdf_attachment.add_header("Content-Disposition", f"attachment; filename=mail_attachment.pdf")
+        # Attach the PDF
+        pdf_attachment = create_pdf_attachment(receiver_name)
         msg.attach(pdf_attachment)
 
         # Connect to the SMTP server and send the email
