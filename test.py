@@ -55,7 +55,7 @@ def send_email(receiver_name, receiver_email):
         return str(e)
 
 # Streamlit UI
-st.title("Email Sender App")
+st.title("Email Sender App v2")
 receiver_name = st.text_input("Enter the name of the recipient:")
 receiver_email = st.text_input("Enter the recipient's email:")
 
