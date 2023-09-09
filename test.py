@@ -1,6 +1,8 @@
 import streamlit as st
 import smtplib
+from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.mime.application import MIMEApplication
 
 # Email configuration (replace with your own credentials)
 sender_email = "cometcreativeconsulting@gmail.com"
@@ -11,16 +13,26 @@ smtp_port = 587
 def send_email(receiver_name, receiver_email):
     try:
         # Create the email content
-        message = MIMEText(f"Hi {receiver_name},\n\nThis mail has been sent to you from the web app.\n\nHave a good day!")
-        message["Subject"] = "Web App Email"
-        message["From"] = sender_email
-        message["To"] = receiver_email
+        msg = MIMEMultipart()
+        msg["From"] = sender_email
+        msg["To"] = receiver_email
+        msg["Subject"] = "Web App Email"
+
+        # Create the email body
+        email_body = f"Hi {receiver_name},\n\nThis mail has been sent to you from the web app.\n\nHave a good day!"
+        body = MIMEText(email_body)
+        msg.attach(body)
+
+        # Create the PDF attachment
+        pdf_attachment = MIMEApplication(email_body.encode("utf-8"), _subtype="pdf")
+        pdf_attachment.add_header("Content-Disposition", f"attachment; filename=mail_attachment.pdf")
+        msg.attach(pdf_attachment)
 
         # Connect to the SMTP server and send the email
         server = smtplib.SMTP(smtp_server, smtp_port)
         server.starttls()
         server.login(sender_email, sender_password)
-        server.sendmail(sender_email, receiver_email, message.as_string())
+        server.sendmail(sender_email, receiver_email, msg.as_string())
         server.quit()
         return True
     except Exception as e:
