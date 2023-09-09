@@ -4,8 +4,6 @@ import os
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
-from docx import Document  # Library to work with .docx files
-from reportlab.pdfgen import canvas  # Library for creating PDFs
 
 # Email configuration (replace with your own credentials)
 sender_email = "cometcreativeconsulting@gmail.com"
@@ -18,12 +16,27 @@ def create_welcome_pdf(name):
     pdf_filename = f"Welcome_Letter_{name}.pdf"
 
     # Create a PDF with the message
-    c = canvas.Canvas(pdf_filename)
-    c.drawString(100, 750, "Hi!")
-    c.drawString(100, 730, "Welcome to the team!")
-    c.drawString(100, 710, "Hope you have a good time!")
-    c.save()
+    from reportlab.lib.pagesizes import letter
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
+    from reportlab.lib.styles import getSampleStyleSheet
+    from reportlab.lib import colors
 
+    doc = SimpleDocTemplate(pdf_filename, pagesize=letter)
+    styles = getSampleStyleSheet()
+    Story = []
+
+    # Add the image
+    img = Image("img1.png", width=400, height=400)
+    Story.append(img)
+
+    # Add the text
+    Story.append(Spacer(1, 12))
+    Story.append(Paragraph(f"Hi {name}!", styles["Title"]))
+    Story.append(Paragraph("Welcome to the team!", styles["Normal"]))
+    Story.append(Paragraph("Hope you have a good time!", styles["Normal"]))
+
+    doc.build(Story)
+    
     return pdf_filename
 
 def send_email(receiver_name, receiver_email):
@@ -60,6 +73,13 @@ def send_email(receiver_name, receiver_email):
 st.title("Welcome Email Sender App")
 receiver_name = st.text_input("Enter the name of the recipient:")
 receiver_email = st.text_input("Enter the recipient's email:")
+
+if st.button("Preview"):
+    if receiver_name and receiver_email:
+        st.image("img1.png", caption="Image Preview", use_column_width=True)
+        st.write(f"Hi {receiver_name}!")
+        st.write("Welcome to the team!")
+        st.write("Hope you have a good time!")
 
 if st.button("Send Welcome Email"):
     if receiver_name and receiver_email:
